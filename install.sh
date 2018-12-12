@@ -77,7 +77,7 @@ if free | awk '/^Swap:/ {exit !$2}'; then
 else
 	touch /var/swap.img
 	chmod 600 /var/swap.img
-	dd if=/dev/zero of=/var/swap.img bs=1024k count=2048
+	dd if=/dev/zero of=/var/swap.img bs=2048 count=1048576
 	mkswap /var/swap.img
 	swapon /var/swap.img
 	echo "/var/swap.img none swap sw 0 0" >> /etc/fstab
