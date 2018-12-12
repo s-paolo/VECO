@@ -6,6 +6,13 @@
 # https://veco.info/        #
 #############################
 
+LOG_FILE=/tmp/install.log
+
+decho () {
+  echo `date +"%H:%M:%S"` $1
+  echo `date +"%H:%M:%S"` $1 >> $LOG_FILE
+}
+
 error() {
   local parent_lineno="$1"
   local message="$2"
