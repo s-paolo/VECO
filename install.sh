@@ -34,12 +34,6 @@ FIG
 # Check for systemd
 systemctl --version >/dev/null 2>&1 || { decho "systemd is required. Are you using Ubuntu 16.04?"  >&2; exit 1; }
 
-# Check if executed as root user
-if [[ $EUID -ne 0 ]]; then
-	echo -e "This script has to be run as \033[1mroot\033[0m user."
-	exit 1
-fi
-
 # Print variable on a screen
 decho "Please make sure you double check information before hitting enter!"
 
