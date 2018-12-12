@@ -6,13 +6,6 @@
 # https://veco.info/        #
 #############################
 
-LOG_FILE=/tmp/install.log
-
-decho () {
-  echo `date +"%H:%M:%S"` $1
-  echo `date +"%H:%M:%S"` $1 >> $LOG_FILE
-}
-
 error() {
   local parent_lineno="$1"
   local message="$2"
@@ -86,54 +79,54 @@ fi
 # Update package and upgrade Ubuntu
 decho "Updating system and installing required packages..."   
 
-apt-get -y update >> $LOG_FILE 2>&1
-apt-get -y upgrade >> $LOG_FILE 2>&1
+apt-get -y update
+apt-get -y upgrade
 
 # Install required packages
 decho "Installing base packages and dependencies..."
 
-apt-get -y install sudo >> $LOG_FILE 2>&1
-apt-get -y install wget >> $LOG_FILE 2>&1
-apt-get -y install git >> $LOG_FILE 2>&1
-apt-get -y install unzip >> $LOG_FILE 2>&1
-apt-get -y install virtualenv >> $LOG_FILE 2>&1
-apt-get -y install python-virtualenv >> $LOG_FILE 2>&1
-apt-get -y install pwgen >> $LOG_FILE 2>&1
+apt-get -y install sudo
+apt-get -y install wget
+apt-get -y install git
+apt-get -y install unzip
+apt-get -y install virtualenv
+apt-get -y install python-virtualenv
+apt-get -y install pwgen
 
 # Install daemon packages
 decho "Installing daemon packages and dependencies..."
 
-apt-get -y install software-properties-common libzmq3-dev pwgen >> $LOG_FILE 2>&1
+apt-get -y install software-properties-common libzmq3-dev pwgen
 apt-get -y install git libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev libboost-all-dev unzip libminiupnpc-dev python-virtualenv >> $LOG_FILE 2>&1
-apt-get -y install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils >> $LOG_FILE 2>&1
+apt-get -y install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils
 
 # Add Berkely PPA
 decho "Installing bitcoin PPA..."
 
-apt-add-repository -y ppa:bitcoin/bitcoin >> $LOG_FILE 2>&1
-apt-get -y update >> $LOG_FILE 2>&1
-apt-get -y install libdb4.8-dev libdb4.8++-dev >> $LOG_FILE 2>&1
+apt-add-repository -y ppa:bitcoin/bitcoin
+apt-get -y update
+apt-get -y install libdb4.8-dev libdb4.8++-dev
 
 
 if [[ ("$install_fail2ban" == "y" || "$install_fail2ban" == "Y" || "$install_fail2ban" == "") ]]; then
 	decho "Optional install: Fail2ban"
 	cd ~
-	apt-get -y install fail2ban >> $LOG_FILE 2>&1
-	systemctl enable fail2ban >> $LOG_FILE 2>&1
-	systemctl start fail2ban >> $LOG_FILE 2>&1
+	apt-get -y install fail2ban
+	systemctl enable fail2ban
+	systemctl start fail2ban
 fi
 
 if [[ ("$UFW" == "y" || "$UFW" == "Y" || "$UFW" == "") ]]; then
 	decho "Optional install: UFW"
-	apt-get -y install ufw >> $LOG_FILE 2>&1
-	ufw allow ssh/tcp >> $LOG_FILE 2>&1
-	ufw allow sftp/tcp >> $LOG_FILE 2>&1
-	ufw allow 26919/tcp >> $LOG_FILE 2>&1
-	ufw allow 26920/tcp >> $LOG_FILE 2>&1
-	ufw default deny incoming >> $LOG_FILE 2>&1
-	ufw default allow outgoing >> $LOG_FILE 2>&1
-	ufw logging on >> $LOG_FILE 2>&1
-	ufw --force enable >> $LOG_FILE 2>&1
+	apt-get -y install ufw
+	ufw allow ssh/tcp
+	ufw allow sftp/tcp
+	ufw allow 26919/tcp
+	ufw allow 26920/tcp
+	ufw default deny incoming
+	ufw default allow outgoing
+	ufw logging on
+	ufw --force enable
 fi
 
 decho "Create user $whoami (if necessary)"
@@ -144,7 +137,7 @@ getent passwd $whoami > /dev/null 2&>1
 
 if [ $? -ne 0 ]; then
 	trap 'error ${LINENO}' ERR
-	adduser --disabled-password --gecos "" $whoami >> $LOG_FILE 2>&1
+	adduser --disabled-password --gecos "" $whoami
 else
 	trap 'error ${LINENO}' ERR
 fi
@@ -183,16 +176,16 @@ chown -R $whoami:$whoami /home/$whoami
 # Install Veco Daemon
 echo 'Downloading daemon...'
 cd
-wget https://github.com/VecoOfficial/Veco/releases/download/v1.0.0/vecoCore-1.0.0-linux64-cli.Ubuntu16.04.tar.gz >> $LOG_FILE 2>&1
-tar xvzf vecoCore-1.0.0-linux64-cli.Ubuntu16.04.tar.gz >> $LOG_FILE 2>&1
+wget https://github.com/VecoOfficial/Veco/releases/download/v1.0.0/vecoCore-1.0.0-linux64-cli.Ubuntu16.04.tar.gz
+tar xvzf vecoCore-1.0.0-linux64-cli.Ubuntu16.04.tar.gz
 chmod -R 755 veco
-cp veco/vecod /usr/bin/ >> $LOG_FILE 2>&1
-cp veco/veco-cli /usr/bin/ >> $LOG_FILE 2>&1
-cp veco/veco-tx /usr/bin/ >> $LOG_FILE 2>&1
-rm -rf veco >> $LOG_FILE 2>&1
+cp veco/vecod /usr/bin/
+cp veco/veco-cli /usr/bin/
+cp veco/veco-tx /usr/bin/
+rm -rf veco
 
 # Run vecod as selected user
-sudo -H -u $whoami bash -c 'vecod' >> $LOG_FILE 2>&1
+sudo -H -u $whoami bash -c 'vecod'
 
 echo 'Veco Core prepared and launched...'
 
@@ -203,13 +196,13 @@ decho "Setting up sentinel..."
 
 # Install sentinel
 echo 'Downloading sentinel...'
-git clone https://github.com/VecoOfficial/sentinel.git /home/$whoami/sentinel >> $LOG_FILE 2>&1
-chown -R $whoami:$whoami /home/$whoami/sentinel >> $LOG_FILE 2>&1
+git clone https://github.com/VecoOfficial/sentinel.git /home/$whoami/sentinel
+chown -R $whoami:$whoami /home/$whoami/sentinel
 
 echo 'Setting up sentinel...'
 cd /home/$whoami/sentinel
-sudo -H -u $whoami bash -c 'virtualenv ./venv' >> $LOG_FILE 2>&1
-sudo -H -u $whoami bash -c './venv/bin/pip install -r requirements.txt' >> $LOG_FILE 2>&1
+sudo -H -u $whoami bash -c 'virtualenv ./venv'
+sudo -H -u $whoami bash -c './venv/bin/pip install -r requirements.txt'
 
 # Deploy script to keep daemon alive
 cat << EOF > /home/$whoami/vecodkeepalive.sh
@@ -225,8 +218,8 @@ chown $whoami:$whoami /home/$whoami/vecodkeepalive.sh
 # Setup crontab
 echo "@reboot sleep 30 && /home/$whoami/vecodkeepalive.sh" >> newCrontab
 echo "* * * * * cd /home/$whoami/sentinel && ./venv/bin/python bin/sentinel.py >/dev/null 2>&1" >> newCrontab
-crontab -u $whoami newCrontab >> $LOG_FILE 2>&1
-rm newCrontab >> $LOG_FILE 2>&1
+crontab -u $whoami newCrontab
+rm newCrontab
 
 # Final Masternode instructions
 decho "Starting your Masternode"
